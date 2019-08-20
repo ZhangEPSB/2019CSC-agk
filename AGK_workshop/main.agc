@@ -50,6 +50,14 @@ SetTextColor(5, 0, 0, 0, 255)
 SetTextSize(5, 40)
 SetTextPosition(5, GetTextX(4) + GetTextTotalWidth(4), 5)
 
+// Laser
+CreateImageColor(6, 255, 0, 0, 255)
+CreateSprite(3,6)
+SetSpriteSize(3, 4, 10)
+laserx = 0 - GetSpriteWidth(3)
+lasery = 0 - GetSpriteHeight(3)
+SetSpritePosition(3, laserx, lasery)
+
 // Player Sprite
 LoadImage(1, "planes blue.png")
 CreateSprite(1, 1)
@@ -73,6 +81,7 @@ SetSpritePosition(2, enemyx, enemyy)
 // Variables
 running = 0
 score = 0
+shooting = 0
 
 do
     gosub startScreen
@@ -82,7 +91,10 @@ do
 		gosub moveEnemy
 		gosub updateSpritePositions
 		gosub checkCollisions
+		gosub shootLaser
+		gosub laserCollisions
 		gosub scoreUp
+		gosub updateSpritePositions
 	endif
 	gosub checkQuit
     Sync()
@@ -177,4 +189,30 @@ return
 scoreUp:
 	score = score + 1
 	SetTextString(5, Str(score))
+return
+
+shootLaser:
+	if GetRawKeyPressed(32) and not shooting
+		shooting = 1
+		laserx = getSpriteX(1) + GetSpriteWidth(1)/2
+		lasery = getSpriteY(1)
+	endif
+	if shooting
+		lasery = lasery - 10
+		SetSpritePosition(3, laserx, lasery)
+		if lasery < 0 - GetSpriteHeight(3)
+			shooting = 0
+		endif
+	endif
+return
+
+laserCollisions:
+	if GetSpriteCollision(2, 3)
+		score = score + 100
+		gosub updateEnemy
+		laserx = GetVirtualWidth()
+		lasery = GetVirtualHeight()
+		SetSpritePosition(3, laserx, lasery)
+		shooting = 0
+	endif
 return
